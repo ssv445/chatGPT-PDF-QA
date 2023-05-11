@@ -15,6 +15,7 @@ export abstract class BufferLoader extends BaseDocumentLoader {
     const tags: string[] = filePath.split('/');
     //remove the filename
     tags.pop();
+    tags.splice(1);
 
     //also record this tags to json file
     // Read the existing data from the JSON file

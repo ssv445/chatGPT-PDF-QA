@@ -33,7 +33,7 @@ export default async function handler(
     const filter =
       filters?.tags?.filter(Boolean).length > 0
         ? {
-            tags: { $in: filters.tags },
+            'tags.0': filters.tags[0],
           }
         : {};
 
