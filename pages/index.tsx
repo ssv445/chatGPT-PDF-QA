@@ -13,26 +13,45 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 
+import * as tagsAsObject from '@/docs/tags.json';
+
+const tags = Object.keys(tagsAsObject);
+interface StateType {
+  messages: Message[];
+  pending?: string;
+  history: [string, string][];
+  pendingSourceDocs?: Document[];
+}
+
+const initState: StateType = {
+  messages: [
+    {
+      message: 'Hi, How I can help you ?',
+      type: 'apiMessage',
+    },
+  ],
+  history: [],
+};
+
 export default function Home() {
   const [query, setQuery] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [messageState, setMessageState] = useState<{
-    messages: Message[];
-    pending?: string;
-    history: [string, string][];
-    pendingSourceDocs?: Document[];
-  }>({
-    messages: [
-      {
-        message: 'Hi, what would you like to learn about the book "Shape Up"?',
-        type: 'apiMessage',
-      },
-    ],
-    history: [],
-  });
+  const [messageState, setMessageState] = useState<StateType>(initState);
 
   const { messages, history } = messageState;
+  const [selectedTag, setSelectedTag] = useState('');
+
+  function resetHistory() {
+    setMessageState((state) => ({
+      ...initState,
+    }));
+  }
+
+  function handleTagChange(event) {
+    resetHistory();
+    setSelectedTag(event.target.value);
+  }
 
   const messageListRef = useRef<HTMLDivElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -77,6 +96,9 @@ export default function Home() {
         body: JSON.stringify({
           question,
           history,
+          filters: {
+            tags: [selectedTag],
+          },
         }),
       });
       const data = await response.json();
@@ -212,6 +234,19 @@ export default function Home() {
             <div className={styles.center}>
               <div className={styles.cloudform}>
                 <form onSubmit={handleSubmit}>
+                  <select
+                    id="select"
+                    value={selectedTag}
+                    onChange={handleTagChange}
+                    className={styles.selecttag}
+                  >
+                    <option value="">Select Topic</option>
+                    {tags.map((tag) => (
+                      <option key={tag} value={tag}>
+                        {tag}
+                      </option>
+                    ))}
+                  </select>
                   <textarea
                     disabled={loading}
                     onKeyDown={handleEnter}

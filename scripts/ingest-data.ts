@@ -5,6 +5,7 @@ import { pinecone } from '@/utils/pinecone-client';
 import { CustomPDFLoader } from '@/utils/customPDFLoader';
 import { PINECONE_INDEX_NAME, PINECONE_NAME_SPACE } from '@/config/pinecone';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
+import { PineconeClient } from '@pinecone-database/pinecone';
 
 /* Name of directory to retrieve your files from */
 const filePath = 'docs';
@@ -32,6 +33,12 @@ export const run = async () => {
     const embeddings = new OpenAIEmbeddings();
     const index = pinecone.Index(PINECONE_INDEX_NAME); //change to your own index name
 
+    //Delete existing vectors from the namespace
+    await index.delete1({
+      deleteAll: true,
+      namespace: PINECONE_NAME_SPACE,
+    });
+
     //embed the PDF documents
     await PineconeStore.fromDocuments(docs, embeddings, {
       pineconeIndex: index,
@@ -40,7 +47,7 @@ export const run = async () => {
     });
   } catch (error) {
     console.log('error', error);
-    throw new Error(`Failed to innngest your data ${error}`);
+    throw new Error(`Failed to ingest your data ${error}`);
   }
 };
 

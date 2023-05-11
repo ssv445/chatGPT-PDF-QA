@@ -9,7 +9,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const { question, history } = req.body;
+  const { question, history, filters } = req.body;
 
   console.log('question', question);
 
@@ -28,6 +28,15 @@ export default async function handler(
   try {
     const index = pinecone.Index(PINECONE_INDEX_NAME);
 
+    // metadata filtering
+    console.dir(filters, { depth: 5 });
+    const filter =
+      filters?.tags?.filter(Boolean).length > 0
+        ? {
+            tags: { $in: filters.tags },
+          }
+        : {};
+
     /* create vectorstore*/
     const vectorStore = await PineconeStore.fromExistingIndex(
       new OpenAIEmbeddings({}),
@@ -35,6 +44,7 @@ export default async function handler(
         pineconeIndex: index,
         textKey: 'text',
         namespace: PINECONE_NAME_SPACE, //namespace comes from your config folder
+        filter: filter,
       },
     );
 
@@ -46,7 +56,7 @@ export default async function handler(
       chat_history: history || [],
     });
 
-    console.log('response', response);
+    console.dir(response, { depth: 4 });
     res.status(200).json(response);
   } catch (error: any) {
     console.log('error', error);
