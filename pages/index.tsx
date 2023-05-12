@@ -13,7 +13,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 
-import * as tagsAsObject from '@/docs/tags.json';
+import tagsAsObject from '@/docs/tags.json';
 
 const tags = Object.keys(tagsAsObject);
 interface StateType {
