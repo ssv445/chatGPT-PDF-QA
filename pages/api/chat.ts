@@ -29,7 +29,7 @@ export default async function handler(
     const index = pinecone.Index(PINECONE_INDEX_NAME);
 
     // metadata filtering
-    console.dir(filters, { depth: 5 });
+    // console.dir(filters, { depth: 5 });
     const filter =
       filters?.tags?.filter(Boolean).length > 0
         ? {
