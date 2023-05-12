@@ -48,7 +48,7 @@ export default function Home() {
     }));
   }
 
-  function handleTagChange(event) {
+  function handleTagChange(event: React.ChangeEvent<HTMLSelectElement>): void {
     resetHistory();
     setSelectedTag(event.target.value);
   }
