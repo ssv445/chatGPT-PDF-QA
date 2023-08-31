@@ -1,11 +1,10 @@
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { PineconeStore } from 'langchain/vectorstores/pinecone';
-import { pinecone } from '@/utils/pinecone-client';
+import { client } from '@/utils/supabase-client';
 import { CustomPDFLoader } from '@/utils/customPDFLoader';
-import { PINECONE_INDEX_NAME, PINECONE_NAME_SPACE } from '@/config/pinecone';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
-import { PineconeClient } from '@pinecone-database/pinecone';
+
+import { SupabaseVectorStore } from 'langchain/vectorstores/supabase'
 
 /* Name of directory to retrieve your files from */
 const filePath = 'docs';
@@ -31,20 +30,19 @@ export const run = async () => {
     console.log('creating vector store...');
     /*create and store the embeddings in the vectorStore*/
     const embeddings = new OpenAIEmbeddings();
-    const index = pinecone.Index(PINECONE_INDEX_NAME); //change to your own index name
-
-    //Delete existing vectors from the namespace
-    await index.delete1({
-      deleteAll: true,
-      namespace: PINECONE_NAME_SPACE,
+    const store = new SupabaseVectorStore(embeddings, {
+      client,
+      tableName: "documents",
     });
 
+    await store.addDocuments(docs);
     //embed the PDF documents
-    await PineconeStore.fromDocuments(docs, embeddings, {
-      pineconeIndex: index,
-      namespace: PINECONE_NAME_SPACE,
-      textKey: 'text',
-    });
+    // await SupabaseVectorStore.fromDocuments(docs, embeddings, {
+    //   client: supabaseClient,
+    //   tableName: "documents",
+    //   queryName: "match_documents",
+    //   textKey: 'text',
+    // });
   } catch (error) {
     console.log('error', error);
     throw new Error(`Failed to ingest your data ${error}`);

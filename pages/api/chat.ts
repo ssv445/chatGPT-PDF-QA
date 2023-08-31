@@ -1,9 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { PineconeStore } from 'langchain/vectorstores/pinecone';
+import { SupabaseVectorStore } from "langchain/vectorstores/supabase";
 import { makeChain } from '@/utils/makechain';
-import { pinecone } from '@/utils/pinecone-client';
-import { PINECONE_INDEX_NAME, PINECONE_NAME_SPACE } from '@/config/pinecone';
+// import { pinecone } from '@/utils/pinecone-client';
+// import { PINECONE_INDEX_NAME, PINECONE_NAME_SPACE } from '@/config/pinecone';
+import {client} from '@/utils/supabase-client'
 
 export default async function handler(
   req: NextApiRequest,
@@ -26,25 +27,25 @@ export default async function handler(
   const sanitizedQuestion = question.trim().replaceAll('\n', ' ');
 
   try {
-    const index = pinecone.Index(PINECONE_INDEX_NAME);
+    // const index = pinecone.Index(PINECONE_INDEX_NAME);
 
     // metadata filtering
     // console.dir(filters, { depth: 5 });
     const filter =
       filters?.tags?.filter(Boolean).length > 0
         ? {
-            'tags.0': filters.tags[0],
-          }
+          'tags.0': {
+            "$in": [ "`${filters.tags[0]}`"]
+          },
+        }
         : {};
 
     /* create vectorstore*/
-    const vectorStore = await PineconeStore.fromExistingIndex(
+    const vectorStore = await SupabaseVectorStore.fromExistingIndex(
       new OpenAIEmbeddings({}),
       {
-        pineconeIndex: index,
-        textKey: 'text',
-        namespace: PINECONE_NAME_SPACE, //namespace comes from your config folder
-        filter: filter,
+        client,
+        // filter: filter,
       },
     );
 
