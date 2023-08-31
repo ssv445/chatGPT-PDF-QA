@@ -11,3 +11,4 @@
 // const PINECONE_NAME_SPACE = process.env.PINECONE_NAME_SPACE ?? 'pdf-test';
 
 // export { PINECONE_INDEX_NAME, PINECONE_NAME_SPACE };
+export  {};
